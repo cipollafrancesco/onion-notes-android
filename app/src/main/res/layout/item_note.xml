@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:elevation="10dp"
+    android:background="@color/white"
+    android:layout_margin="5dp">
+
+    <TextView
+        android:id="@+id/item_title_id"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:text="@string/item_note_title"
+        android:textSize="25dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/item_last_update_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/item_title_id"
+        android:layout_alignParentEnd="true"
+        android:text="@string/item_note_last_update_date"
+        android:paddingBottom="5dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_below="@id/item_last_update_id"
+        android:paddingBottom="10dp" />
+
+    <TextView
+        android:id="@+id/item_body_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@id/item_title_id"
+        android:layout_below="@id/item_title_id"
+        android:paddingTop="5dp"
+        android:text="@string/item_note_body"
+        android:textSize="15dp"
+        android:textStyle="italic" />
+</RelativeLayout>

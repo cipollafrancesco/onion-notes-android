@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">OnionNotes</string>
+    <string name="button_done_label">Done</string>
+    <string name="button_cancel_label">Cancel</string>
+
+
+    <string name="item_note_title">Title</string>
+    <string name="item_note_body">Write on!</string>
+    <string name="item_note_last_update_date">Last update</string>
+    <string name="item_note_creation_date">Creation</string>
+
+    <string name="dialog_note_add_title">New note</string>
 </resources>

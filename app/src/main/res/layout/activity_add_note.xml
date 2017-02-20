@@ -1,0 +1,53 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp">
+
+    <EditText
+        android:id="@+id/activity_add_title_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#00000000"
+        android:hint="@string/item_note_title"
+        android:inputType="text"
+        android:textAlignment="center"
+        android:textSize="25dp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/activity_add_creation_date_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/activity_add_title_et"
+        android:inputType="datetime"
+        android:paddingBottom="5dp"
+        android:text="@string/item_note_creation_date" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/activity_add_creation_date_tv"
+        android:background="@android:color/darker_gray" />
+
+    <EditText
+        android:id="@+id/activity_edit_body_et"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/activity_add_creation_date_tv"
+        android:background="#00000000"
+        android:gravity="start"
+        android:hint="@string/item_note_body"
+        android:inputType="text|textMultiLine|textCapSentences"
+        android:paddingTop="10dp"
+        android:textSize="16dp"
+        android:textStyle="normal" />
+
+    <Button
+        android:id="@+id/activity_add_done_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/button_done_label" />
+
+</RelativeLayout>
