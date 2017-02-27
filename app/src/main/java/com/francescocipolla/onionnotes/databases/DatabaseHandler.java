@@ -5,10 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
 import com.francescocipolla.onionnotes.models.Note;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -23,7 +27,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String PRIMARY_KEY = "id";
     private static final String TITLE = "title";
     private static final String BODY = "body";
-    private static final String DATE = "creation_date";
+    private static final String CREATION_DATE = "creation_date";
+    private static final String LAST_UPDATE = "last_update";
 
     // Database Version
     private static final int DATABASE_VERSION = 2;
@@ -42,7 +47,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_TABLE = "CREATE TABLE " + TABLE_NOTES + "("
                 + PRIMARY_KEY + " INTEGER PRIMARY KEY," + TITLE + " TEXT,"
-                + BODY + " TEXT," + DATE + " TEXT" + ")";
+                + BODY + " TEXT," + CREATION_DATE + " TEXT, " + LAST_UPDATE + " TEXT " + ")";
         db.execSQL(CREATE_TABLE);
     }
 
@@ -56,15 +61,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
      * CRUD operations
      */
 
-    public void addNote(Note note) {
+    public int addNote(Note note) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues myContainer = new ContentValues(); // Container for Values to Query
         myContainer.put(TITLE, note.getTitle());
         myContainer.put(BODY, note.getBody());
-        myContainer.put(DATE, note.getCreationDate());
-
-        db.insert(TABLE_NOTES, null, myContainer); // Query to insert data
+        myContainer.put(CREATION_DATE, note.getCreationDate());
+        myContainer.put(LAST_UPDATE, note.getCreationDate());
+        int noteId = (int) db.insert(TABLE_NOTES, null, myContainer); // Query to insert data
         db.close(); // Close connection
+        return noteId;
     }
 
     public ArrayList<Note> getAllNotes() {
@@ -82,28 +88,45 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.setTitle(cursor.getString(1));
                 note.setBody(cursor.getString(2));
                 note.setCreationDate(cursor.getString(3));
+                note.setLastUpdateDate(cursor.getString(4));
                 myNotes.add(note);
             } while (cursor.moveToNext());
         }
         return myNotes;
     }
 
-    public int removeNote(Note note) {
+    public void removeNote(Note note) {
         SQLiteDatabase db = getWritableDatabase();
         String whereClause = PRIMARY_KEY + " = '" + note.getId() + "'";
-        int result = db.delete(TABLE_NOTES, whereClause, null); //Query
+        db.delete(TABLE_NOTES, whereClause, null); //Query
         db.close();
-        return result;
     }
 
-    public void editNote(Note note){
-
+    public void editNote(Note note) {
+        SQLiteDatabase db = getWritableDatabase();
+        String updateQuery = "UPDATE " + TABLE_NOTES +
+                " SET " + TITLE + " = '" + note.getTitle() + "' , " +
+                BODY + " = '" + note.getBody() + "' , " + LAST_UPDATE + " = '" + dateFormat.format(new Date()) + "' ";
+        String whereClause = "WHERE " + PRIMARY_KEY + " = '" + note.getId() + "' ;";
+        // Log.d("UPDATE QUERY: ", updateQuery + whereClause);
+        db.execSQL(updateQuery + whereClause);
     }
 
-    public Note getNote(String Title){
-        String query = "SELECT * FROM "+TABLE_NOTES+ " WHERE ";
-                return null;
-    }
+    public Note getNote(int id) {
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT * FROM " + TABLE_NOTES + " ";
+        String whereClause = "WHERE " + PRIMARY_KEY + " = '" + id + "' ;";
+        Cursor cursor = db.rawQuery(query + whereClause, null);  // provides random read-write access to the result set returned by a database query.
 
+        Note note = new Note();
+        if (cursor.moveToFirst()) {
+            note.setId(Integer.parseInt(cursor.getString(0)));
+            note.setTitle(cursor.getString(1));
+            note.setBody(cursor.getString(2));
+            note.setCreationDate(cursor.getString(3));
+            note.setLastUpdateDate(cursor.getString(4));
+        }
+        return note;
+    }
 
 }

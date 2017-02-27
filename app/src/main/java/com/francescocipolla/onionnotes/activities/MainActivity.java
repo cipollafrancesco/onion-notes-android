@@ -18,10 +18,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import com.francescocipolla.onionnotes.R;
 import com.francescocipolla.onionnotes.adapters.NoteAdapter;
 import com.francescocipolla.onionnotes.databases.DatabaseHandler;
 import com.francescocipolla.onionnotes.models.Note;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(noteAdapter);
         intent = getIntent();
 
-        context  = this; // save this context for inner classes
+        context = this; // save this context for inner classes
         // setting action to the + button
 
         findViewById(R.id.add_note).setOnClickListener(new View.OnClickListener() {
@@ -89,8 +91,10 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             String noteTitle = data.getStringExtra("NOTE_TITLE");
             String noteBody = data.getStringExtra("NOTE_BODY");
-            Note newNote = new Note(noteTitle,noteBody);
-            dbHandler.addNote(newNote); // Add to DB
+            Note newNote = new Note(noteTitle, noteBody);
+            int noteId = dbHandler.addNote(newNote); // Add to DB
+            newNote.setId(noteId);
+            // Log.d("NOTE_ID: ",String.valueOf(noteId));
             noteAdapter.addNote(newNote);   // add to the list
             recyclerView.scrollToPosition(0);
         }
@@ -121,11 +125,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case R.id.menu_edit_button:
-                    Toast.makeText(context, "Edited", Toast.LENGTH_SHORT);
                     int editNotePosition = noteAdapter.getPosition();
-                    Note toEditNote = noteAdapter.getDataSet().get(editNotePosition);
                     showEditDialog(editNotePosition);
-                    noteAdapter.getDataSet().get(editNotePosition).setLastUpdateDate(dateFormat.format(new Date()));
+                    Toast.makeText(context, "Edited", Toast.LENGTH_SHORT);
                     break;
             }
             return true;
@@ -139,10 +141,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void showEditDialog(final int adapterPosition) {
 
-        Log.d("MainActivity: ","showEditDialog ENTERED");
+        Log.d("MainActivity: ", "showEditDialog ENTERED");
         Note nota = noteAdapter.getDataSet().get(adapterPosition);
 
-        final View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_note,null);
+        final View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_note, null);
         final EditText titleEt = (EditText) dialogView.findViewById(R.id.activity_edit_title_et);
         final EditText bodyEt = (EditText) dialogView.findViewById(R.id.activity_edit_body_et);
 
@@ -160,13 +162,14 @@ public class MainActivity extends AppCompatActivity {
                 String newBody = bodyEt.getText().toString();
                 Note myChoose = noteAdapter.getDataSet().get(adapterPosition);
                 // I have to get the adapter position and alter the fields
-                if (!myChoose.getTitle().equals(newTitle)) {
-                    myChoose.setTitle(newTitle);
 
-                }
-                if (!myChoose.getBody().equals(newBody)) {
-                    myChoose.setBody(newBody);
-                }
+                myChoose.setTitle(newTitle);
+                myChoose.setBody(newBody);
+
+                myChoose.setLastUpdateDate(dateFormat.format(new Date()));
+                dbHandler.editNote(myChoose);
+                noteAdapter.editNote(myChoose,adapterPosition);
+                Toast.makeText(context,"Edited",Toast.LENGTH_SHORT);
             }
         });
 
