@@ -4,13 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryLight"
-    >
+    android:elevation="10dp">
+
+    <include layout="@layout/toolbar_note"
+        android:id="@+id/toolbar"/>
 
     <android.support.v7.widget.RecyclerView
-
         android:id="@+id/notes_rv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add_note"
