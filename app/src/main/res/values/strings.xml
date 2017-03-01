@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">OnionNotes</string>
+    <string name="app_name">Onion Notes</string>
     <string name="button_done_label">Done</string>
     <string name="button_cancel_label">Cancel</string>
 
@@ -10,4 +10,6 @@
     <string name="item_note_creation_date">Creation</string>
 
     <string name="dialog_note_add_title">New note</string>
+
+    <string name="toolbar_add_title">Add</string>
 </resources>

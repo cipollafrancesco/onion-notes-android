@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     Intent intent;
 
-    DatabaseHandler dbHandler;
+    private DatabaseHandler dbHandler;
     public Context context;
 
     @Override
@@ -76,6 +76,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Set the dataSet with the DB elements
         noteAdapter.setDataSet(dbHandler.getAllNotes());
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        noteAdapter.setDataSet(dbHandler.getAllNotes()); // non va bene questo
     }
 
     @Override
@@ -130,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(context, "Edited", Toast.LENGTH_SHORT);
                     break;
             }
+            mode.finish(); //Closes the bar
             return true;
         }
 
@@ -168,8 +175,8 @@ public class MainActivity extends AppCompatActivity {
 
                 myChoose.setLastUpdateDate(dateFormat.format(new Date()));
                 dbHandler.editNote(myChoose);
-                noteAdapter.editNote(myChoose,adapterPosition);
-                Toast.makeText(context,"Edited",Toast.LENGTH_SHORT);
+                noteAdapter.editNote(myChoose, adapterPosition);
+                Toast.makeText(context, "Edited", Toast.LENGTH_SHORT);
             }
         });
 

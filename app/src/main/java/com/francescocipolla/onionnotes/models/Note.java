@@ -1,5 +1,7 @@
 package com.francescocipolla.onionnotes.models;
 
+import android.text.Editable;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -11,7 +13,7 @@ import java.util.Locale;
 
 public class Note {
 
-    DateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
+    private DateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
     private int id;
     private String title;
     private String body;

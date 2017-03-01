@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
     android:background="@color/white"
+    android:clickable="true"
     android:elevation="10dp"
     android:padding="10dp">
 
@@ -41,4 +42,5 @@
         android:text="@string/item_note_body"
         android:textSize="15dp"
         android:textStyle="italic" />
+
 </RelativeLayout>

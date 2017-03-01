@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.francescocipolla.onionnotes.models.Note;
 
@@ -129,4 +128,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return note;
     }
 
+    public void deleteAllNotes() {
+        getWritableDatabase().delete(TABLE_NOTES, " 1 = 1", null);
+    }
+
+    public int getNotesNumber() {
+        SQLiteDatabase db = getWritableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_NOTES + " ";
+        Cursor cursor = db.rawQuery(query, null);
+        return cursor.getInt(0);
+    }
 }

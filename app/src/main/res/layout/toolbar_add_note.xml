@@ -5,13 +5,14 @@
     android:layout_height="wrap_content"
     android:background="?attr/colorPrimary">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Notes"
+    <!--<TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/toolbar_add_title"
         android:textStyle="bold"
         android:textColor="@color/white"
-        android:textSize="20dp"/>
+        android:textAlignment="center"
+        android:textSize="20dp"/>-->
 
 </android.support.v7.widget.Toolbar>
 
