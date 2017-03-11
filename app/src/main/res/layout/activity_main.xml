@@ -6,14 +6,10 @@
     android:background="@color/colorPrimaryLight"
     android:elevation="10dp">
 
-    <include layout="@layout/toolbar_note"
-        android:id="@+id/toolbar"/>
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/notes_rv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"/>
+        android:layout_height="match_parent" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add_note"
@@ -22,6 +18,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/material_component_floating_action_button_margin"
-        android:src="@drawable/plus" />
+        android:src="@drawable/ic_add_white_24dp" />
 
 </RelativeLayout>

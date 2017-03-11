@@ -10,22 +10,24 @@
 
     <TextView
         android:id="@+id/item_title_id"
-        android:layout_width="280dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/item_note_title"
+        android:textAlignment="center"
         android:textSize="25dp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/item_last_update_id"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:textAlignment="textStart"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/item_title_id"
-        android:layout_alignParentEnd="true"
+        android:layout_below="@id/item_title_id"
         android:paddingBottom="5dp"
         android:text="@string/item_note_last_update_date" />
 
     <View
+        android:id="@+id/item_divider_id"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@id/item_last_update_id"
@@ -37,10 +39,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/item_title_id"
-        android:layout_below="@id/item_title_id"
+        android:layout_below="@id/item_divider_id"
         android:paddingTop="5dp"
         android:text="@string/item_note_body"
         android:textSize="15dp"
         android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/item_expire_date_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_body_id"
+        android:layout_centerHorizontal="true"
+        android:text="@string/item_note_expire_date"
+        android:textStyle="italic" />
+
+    <ImageView
+        android:id="@+id/item_bookmark_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/item_body_id"
+        android:src="@drawable/ic_bookmark_grey_24dp"
+        android:visibility="invisible" />
 
 </RelativeLayout>

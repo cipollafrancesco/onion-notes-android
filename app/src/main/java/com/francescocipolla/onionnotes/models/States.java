@@ -5,5 +5,5 @@ package com.francescocipolla.onionnotes.models;
  */
 
 public enum States {
-    DONE, FILED, EDITED, RUNNING
+    RUNNING, EXPIRED;
 }

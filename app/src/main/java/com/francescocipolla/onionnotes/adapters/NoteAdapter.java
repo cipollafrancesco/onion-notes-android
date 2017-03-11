@@ -22,14 +22,9 @@ import java.util.Locale;
  */
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteVH> {
 
-    DateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
+    private static DateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
     private ArrayList<Note> dataSet = new ArrayList<>();
     private int position;
-
-    public void setDataSet(ArrayList<Note> dataSet) {
-        this.dataSet = dataSet;
-        notifyDataSetChanged();
-    }
 
     public void addNote(Note note) {
         dataSet.add(0, note);
@@ -58,6 +53,11 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteVH> {
         return dataSet;
     }
 
+    public void setDataSet(ArrayList<Note> dataSet) {
+        this.dataSet = dataSet;
+        notifyDataSetChanged();
+    }
+
     @Override
     public NoteAdapter.NoteVH onCreateViewHolder(ViewGroup parent, int viewType) {
         // LayoutInflater instantiates a layout XML file into its corresponding View objects.
@@ -70,7 +70,11 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteVH> {
         Note lastNote = dataSet.get(position);
         holder.title.setText(lastNote.getTitle());
         holder.body.setText(lastNote.getBody());
-        holder.lastUpdate.setText(lastNote.getCreationDate());
+        holder.lastUpdate.setText(lastNote.getLastUpdateDate());
+        holder.expireDate.setText(lastNote.getExpireDate());
+        int visibility = (lastNote.isBookmarked()) ? View.VISIBLE : View.INVISIBLE;
+        holder.itemView.findViewById(R.id.item_bookmark_id).setVisibility(visibility);
+        holder.itemView.setBackgroundColor(lastNote.getNoteColor());
     }
 
     @Override
@@ -79,18 +83,17 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteVH> {
     }
 
     class NoteVH extends RecyclerView.ViewHolder {
-        TextView title;
-        TextView body;
-        TextView lastUpdate;
+        TextView title, body, lastUpdate, expireDate;
         ActionMode mActionMode;
         ActionMode.Callback mActionModeCallback;
 
         NoteVH(final View itemView) {
             super(itemView);
-            // match between the XML components and the NoteView java attributes
+            // Connect the XML components and the NoteView java attributes
             title = (TextView) itemView.findViewById(R.id.item_title_id);
             body = (TextView) itemView.findViewById(R.id.item_body_id);
             lastUpdate = (TextView) itemView.findViewById(R.id.item_last_update_id);
+            expireDate = (TextView) itemView.findViewById(R.id.item_expire_date_id);
             lastUpdate.setText(dateFormat.format(new Date()));
 
             itemView.setOnLongClickListener(new View.OnLongClickListener() {

@@ -3,15 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_edit_button"
-        android:icon="@drawable/edit"
+        android:icon="@drawable/ic_edit_white_24dp"
         android:orderInCategory="100"
         android:title="Edit"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/menu_delete_button"
-        android:icon="@drawable/delete"
+        android:icon="@drawable/ic_delete_white_24dp"
         android:orderInCategory="100"
         android:title="Delete"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_mark_button"
+        android:icon="@drawable/ic_bookmark_border_white_24dp"
+        android:orderInCategory="100"
+        android:title="Favorite"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_color_button"
+        android:icon="@drawable/ic_palette_white_24dp"
+        android:orderInCategory="100"
+        android:title="Color"
+        app:showAsAction="always" />
+
 </menu>

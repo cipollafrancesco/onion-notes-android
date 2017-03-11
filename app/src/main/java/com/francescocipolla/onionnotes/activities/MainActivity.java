@@ -4,13 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,119 +25,106 @@ import com.francescocipolla.onionnotes.R;
 import com.francescocipolla.onionnotes.adapters.NoteAdapter;
 import com.francescocipolla.onionnotes.databases.DatabaseHandler;
 import com.francescocipolla.onionnotes.models.Note;
+import com.francescocipolla.onionnotes.models.States;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
+    //    Date Formatter
+    private static DateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
+    private static DateFormat otherDateFormat = new SimpleDateFormat("MM/dd/yy");
 
-    DateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
-
+    //    Constants
     private static final int REQUEST_ADD = 1001;
-    private static final int REQUEST_EDIT = 1002;
+    private static final String SHARED_PREFERENCES_KEY = "LAYOUT_TYPE";
 
-    LinearLayoutManager layoutManager;
-    NoteAdapter noteAdapter;
-    RecyclerView recyclerView;
-    Intent intent;
+    //    RecyclerView Objects
+    private RecyclerView.LayoutManager layoutManager;
+    private NoteAdapter noteAdapter;
+    private RecyclerView recyclerView;
+    //  Shared Preferences
+    SharedPreferences sharedPreferences;
 
+    //    Helper variables
+    private static boolean checkExpiration = true;
+    private boolean layoutType;
+
+    //    Utilities
     private DatabaseHandler dbHandler;
     public Context context;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Creating the OBJs
-        recyclerView = (RecyclerView) findViewById(R.id.notes_rv); // get the recycleView from the XML
-        layoutManager = new LinearLayoutManager(this); // needs a context -> this
-        noteAdapter = new NoteAdapter();
-
-        dbHandler = new DatabaseHandler(this);
-
-
-        // Setting the RV fundamentals
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(noteAdapter);
-        intent = getIntent();
-
-        context = this; // save this context for inner classes
-        // setting action to the + button
-
-        findViewById(R.id.add_note).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, AddNoteActivity.class);
-                ((Activity) context).startActivityForResult(intent, REQUEST_ADD);
-            }
-        });
-
-        // Set the dataSet with the DB elements
-        noteAdapter.setDataSet(dbHandler.getAllNotes());
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        noteAdapter.setDataSet(dbHandler.getAllNotes()); // non va bene questo
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = this.getMenuInflater();
-        inflater.inflate(R.menu.menu_options, menu);
-        return true;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            String noteTitle = data.getStringExtra("NOTE_TITLE");
-            String noteBody = data.getStringExtra("NOTE_BODY");
-            Note newNote = new Note(noteTitle, noteBody);
-            int noteId = dbHandler.addNote(newNote); // Add to DB
-            newNote.setId(noteId);
-            // Log.d("NOTE_ID: ",String.valueOf(noteId));
-            noteAdapter.addNote(newNote);   // add to the list
-            recyclerView.scrollToPosition(0);
-        }
-    }
 
     public ActionMode actionMode;
     public ActionMode.Callback mActionCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Setting the other Menu Bar
             getMenuInflater().inflate(R.menu.menu_options, menu);
             return true;
         }
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
+            int adapterPosition = noteAdapter.getPosition();
+            if (noteAdapter.getDataSet().get(adapterPosition).isBookmarked()) {
+                menu.findItem(R.id.menu_mark_button).setIcon(R.drawable.ic_bookmark_white_24dp);
+                return true;
+            } else {
+                menu.findItem(R.id.menu_mark_button).setIcon(R.drawable.ic_bookmark_border_white_24dp);
+                return true;
+            }
         }
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            int notePosition = 0;
+            Note temp = null;
+            String toastString = null;
+
             switch (item.getItemId()) {
                 case R.id.menu_delete_button:
-                    int deadPosition = noteAdapter.getPosition();
-                    Note deadNote = noteAdapter.getDataSet().get(deadPosition);
-                    noteAdapter.deleteNote(deadPosition);
-                    dbHandler.removeNote(deadNote);
-                    Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT);
+                    notePosition = noteAdapter.getPosition();
+                    temp = noteAdapter.getDataSet().get(notePosition);
+                    noteAdapter.deleteNote(notePosition);
+                    dbHandler.removeNote(temp);
+                    toastString = "Deleted";
                     break;
 
                 case R.id.menu_edit_button:
-                    int editNotePosition = noteAdapter.getPosition();
-                    showEditDialog(editNotePosition);
-                    Toast.makeText(context, "Edited", Toast.LENGTH_SHORT);
+                    notePosition = noteAdapter.getPosition();
+                    showEditDialog(notePosition);
+                    mode.finish(); //Closes the bar
+                    return true; // Doesn't make the toast
+
+                case R.id.menu_mark_button:
+                    notePosition = noteAdapter.getPosition();
+                    temp = noteAdapter.getDataSet().get(notePosition);
+                    int id = noteAdapter.getDataSet().get(notePosition).getId();
+                    boolean bookmark = false;
+                    if (!temp.isBookmarked()) {
+                        bookmark = true;
+                        dbHandler.bookmark(id);
+                        toastString = "Bookmarked";
+                    } else {
+                        dbHandler.removeBookmark(id);
+                        toastString = "Bookmark removed";
+                    }
+                    temp.setBookmarked(bookmark);
+                    //Log.d("is it Bookmarked? ", dbHandler.getNote(id).toString());
+                    // Log.d("Result: ",temp.toString());
+                    noteAdapter.notifyItemChanged(notePosition);
+                    break;
+                case R.id.menu_color_button:
+                    // Show palette and change color
                     break;
             }
+            Toast.makeText(context, toastString, Toast.LENGTH_SHORT).show();
             mode.finish(); //Closes the bar
             return true;
         }
@@ -145,10 +134,140 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+    private Intent intent;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        intent = getIntent();
+        context = this; // save this context for inner classes
+
+//        Get the shared preferences from the last time
+        sharedPreferences = getPreferences(MODE_PRIVATE);
+        layoutType = sharedPreferences.getBoolean(SHARED_PREFERENCES_KEY, true);
+
+//         Creating the OBJs
+        recyclerView = (RecyclerView) findViewById(R.id.notes_rv); // get the recycleView from the XML
+
+        noteAdapter = new NoteAdapter();
+        dbHandler = new DatabaseHandler(this);
+
+//         Setting the right Layout  basing on the SharedPreferences
+        RecyclerView.LayoutManager layoutManager = (layoutType) ? new LinearLayoutManager(this)
+                : new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+
+//        Setting the RV fundamentals
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(noteAdapter);
+
+//         Setting action to the FloatingActionButton
+        findViewById(R.id.add_note).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, AddNoteActivity.class);
+                ((Activity) context).startActivityForResult(intent, REQUEST_ADD);
+            }
+        });
+
+//       Updating the Expired Notes's STATUS
+        if (checkExpiration) {
+            setExpired(noteAdapter.getDataSet());
+            checkExpiration = false;
+        }
+//         Add the Database Elements to the Data Set
+        noteAdapter.setDataSet(dbHandler.getAllNotes());
+    }
+
+    private void setExpired(ArrayList<Note> dataSet) {
+        long currentTimeMillis = Calendar.getInstance().getTimeInMillis();
+        long expireTimeMillis;
+        Date d = null;
+        for (Note note : dataSet) {
+            try {
+                d = otherDateFormat.parse(note.getExpireDate());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            expireTimeMillis = d.getTime();
+            if (currentTimeMillis > expireTimeMillis) {
+                note.setStatus(States.EXPIRED);
+                dbHandler.changeStatus(note);
+            }
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        noteAdapter.setDataSet(dbHandler.getAllNotes()); // Sends to much requests
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Set the new SharedPreferences when closing the App
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(SHARED_PREFERENCES_KEY, layoutType);
+        editor.commit();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Setting the menu (It is called when MainActivity Starts)
+        MenuInflater inflater = this.getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        if (layoutType) {
+            menu.getItem(0).setIcon(R.drawable.ic_view_quilt_white_24dp);
+        } else {
+            menu.getItem(0).setIcon(R.drawable.ic_view_stream_white_24dp);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+//        Switch LinearLayout || StaggeredLayout
+        switch (item.getItemId()) {
+            case R.id.menu_main_change_layout:
+                // Switch the Layouts
+                if (!layoutType) {
+                    item.setIcon(R.drawable.ic_view_quilt_white_24dp);
+                    layoutManager = new LinearLayoutManager(context);
+                    layoutType = true;
+                } else {
+                    item.setIcon(R.drawable.ic_view_stream_white_24dp);
+                    layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+                    layoutType = false;
+                }
+                // Set the LayoutManager
+                recyclerView.setLayoutManager(layoutManager);
+                break;
+        }
+        return true;
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            Note newNote = new Note(
+                    data.getStringExtra("NOTE_TITLE"),
+                    data.getStringExtra("NOTE_BODY"),
+                    data.getStringExtra("NOTE_EXPIRATION"),
+                    data.getIntExtra("NOTE_COLOR", Color.WHITE)
+            );
+            int noteId = dbHandler.addNote(newNote); // Add to Database getting the ID
+            newNote.setId(noteId);      // Create the note
+            noteAdapter.addNote(newNote);   // Add to the Data Set
+            recyclerView.scrollToPosition(0);
+        }
+    }
 
     private void showEditDialog(final int adapterPosition) {
 
-        Log.d("MainActivity: ", "showEditDialog ENTERED");
+//        Log.d("MainActivity: ", "showEditDialog ENTERED");
         Note nota = noteAdapter.getDataSet().get(adapterPosition);
 
         final View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_note, null);
@@ -189,4 +308,5 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog addNoteDialog = dialogBuilder.create(); // creating the dialog
         addNoteDialog.show();   // showing it
     }
+
 }

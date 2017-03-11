@@ -3,10 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/menu_add_change_color_button"
+        android:icon="@drawable/ic_palette_white_24dp"
+        android:orderInCategory="100"
+        android:title="Change Color"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/menu_add_confirm_button"
-        android:icon="@drawable/check"
+        android:icon="@drawable/ic_check_white_24dp"
         android:orderInCategory="100"
         android:title="Done"
-        app:showAsAction="always"/>
+        app:showAsAction="always" />
+
 
 </menu>

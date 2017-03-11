@@ -5,8 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.francescocipolla.onionnotes.models.Note;
+import com.francescocipolla.onionnotes.models.States;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -26,11 +28,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String PRIMARY_KEY = "id";
     private static final String TITLE = "title";
     private static final String BODY = "body";
-    private static final String CREATION_DATE = "creation_date";
     private static final String LAST_UPDATE = "last_update";
+    private static final String EXPIRE_DATE = "expire_date";
+    private static final String BOOKMARKED = "bookmarked";
+    private static final String NOTE_COLOR = "note_color";
+    private static final String NOTE_STATUS = "note_status";
+
 
     // Database Version
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 4;
 
     // Database Name
     private static final String DATABASE_NAME = "notes";
@@ -46,7 +52,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_TABLE = "CREATE TABLE " + TABLE_NOTES + "("
                 + PRIMARY_KEY + " INTEGER PRIMARY KEY," + TITLE + " TEXT,"
-                + BODY + " TEXT," + CREATION_DATE + " TEXT, " + LAST_UPDATE + " TEXT " + ")";
+                + BODY + " TEXT," + LAST_UPDATE + " TEXT, " + EXPIRE_DATE + " TEXT, "
+                + BOOKMARKED + " INTEGER, " + NOTE_COLOR + " INTEGER, "
+                + NOTE_STATUS + " TEXT" + ")";
         db.execSQL(CREATE_TABLE);
     }
 
@@ -65,8 +73,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues myContainer = new ContentValues(); // Container for Values to Query
         myContainer.put(TITLE, note.getTitle());
         myContainer.put(BODY, note.getBody());
-        myContainer.put(CREATION_DATE, note.getCreationDate());
-        myContainer.put(LAST_UPDATE, note.getCreationDate());
+        myContainer.put(LAST_UPDATE, note.getLastUpdateDate());
+        myContainer.put(EXPIRE_DATE, note.getExpireDate());
+        myContainer.put(BOOKMARKED, note.isBookmarked());
+        myContainer.put(NOTE_COLOR, note.getNoteColor());
+        myContainer.put(NOTE_STATUS, note.getStatus().name());
+        // Insert the status
         int noteId = (int) db.insert(TABLE_NOTES, null, myContainer); // Query to insert data
         db.close(); // Close connection
         return noteId;
@@ -81,13 +93,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectAllQuery, null);  // provides random read-write access to the result set returned by a database query.
 
         if (cursor.moveToFirst()) {
+            String status = null;
+            States state = null;
             do {
                 Note note = new Note();
                 note.setId(Integer.parseInt(cursor.getString(0)));
                 note.setTitle(cursor.getString(1));
                 note.setBody(cursor.getString(2));
-                note.setCreationDate(cursor.getString(3));
-                note.setLastUpdateDate(cursor.getString(4));
+                note.setLastUpdateDate(cursor.getString(3));
+                note.setExpireDate(cursor.getString(4));
+                note.setBookmarked(cursor.getInt(5) > 0);
+                note.setNoteColor(cursor.getInt(6));
+                status = cursor.getString(7);
+                state = (status.equalsIgnoreCase(States.RUNNING.name())) ? States.RUNNING : States.EXPIRED;
+                note.setStatus(state);
+//                System.out.println("Note: " + note.getTitle() + " " + "Status: " + note.getStatus());
+//                if (state.equals(States.RUNNING))
                 myNotes.add(note);
             } while (cursor.moveToNext());
         }
@@ -116,26 +137,59 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String query = "SELECT * FROM " + TABLE_NOTES + " ";
         String whereClause = "WHERE " + PRIMARY_KEY + " = '" + id + "' ;";
         Cursor cursor = db.rawQuery(query + whereClause, null);  // provides random read-write access to the result set returned by a database query.
-
         Note note = new Note();
         if (cursor.moveToFirst()) {
             note.setId(Integer.parseInt(cursor.getString(0)));
             note.setTitle(cursor.getString(1));
             note.setBody(cursor.getString(2));
-            note.setCreationDate(cursor.getString(3));
-            note.setLastUpdateDate(cursor.getString(4));
+            note.setLastUpdateDate(cursor.getString(3));
+            note.setExpireDate(cursor.getString(4));
+            note.setBookmarked(cursor.getInt(5) > 0);
+            note.setNoteColor(cursor.getInt(6));
+
+            String status = cursor.getString(7);
+            States state = (status.equalsIgnoreCase(States.RUNNING.name())) ? States.RUNNING : States.EXPIRED;
+            note.setStatus(state);
+            System.out.println("Status: " + state);
         }
         return note;
     }
 
-    public void deleteAllNotes() {
-        getWritableDatabase().delete(TABLE_NOTES, " 1 = 1", null);
+    public void changeStatus(Note note) {
+        SQLiteDatabase db = getWritableDatabase();
+        String updateQuery = "UPDATE " + TABLE_NOTES +
+                " SET " + NOTE_STATUS + " = '" + note.getStatus().name() + " '";
+        String whereClause = "WHERE " + PRIMARY_KEY + " = '" + note.getId() + "' ;";
+        Log.d("UPDATE QUERY: ", updateQuery + whereClause);
+        db.execSQL(updateQuery + whereClause);
     }
 
-    public int getNotesNumber() {
+//    public void deleteAllNotes() {
+//        getWritableDatabase().delete(TABLE_NOTES, " 1 = 1", null);
+//    }
+
+//    public int getNotesNumber() {
+//        SQLiteDatabase db = getWritableDatabase();
+//        String query = "SELECT COUNT(*) FROM " + TABLE_NOTES + " ";
+//        Cursor cursor = db.rawQuery(query, null);
+//        return cursor.getInt(0);
+//    }
+
+    public void bookmark(int id) {
         SQLiteDatabase db = getWritableDatabase();
-        String query = "SELECT COUNT(*) FROM " + TABLE_NOTES + " ";
-        Cursor cursor = db.rawQuery(query, null);
-        return cursor.getInt(0);
+        String updateQuery = "UPDATE " + TABLE_NOTES +
+                " SET " + BOOKMARKED + " = 1 ";
+        String whereClause = "WHERE " + PRIMARY_KEY + " = '" + id + "' ";
+        // Log.d("UPDATE QUERY: ", updateQuery + whereClause);
+        db.execSQL(updateQuery + whereClause);
+    }
+
+    public void removeBookmark(int id) {
+        SQLiteDatabase db = getWritableDatabase();
+        String updateQuery = "UPDATE " + TABLE_NOTES +
+                " SET " + BOOKMARKED + " = 0 ";
+        String whereClause = "WHERE " + PRIMARY_KEY + " = '" + id + "' ";
+        // Log.d("UPDATE QUERY: ", updateQuery + whereClause);
+        db.execSQL(updateQuery + whereClause);
     }
 }

@@ -1,16 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="0dp">
-
-    <include
-        android:id="@+id/toolbar_add"
-        layout="@layout/toolbar_add_note" />
+    android:padding="0dp"
+    android:id="@+id/activity_add_note">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar_add"
         android:orientation="vertical"
         android:padding="10dp">
 
@@ -18,27 +14,51 @@
             android:id="@+id/activity_add_title_et"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
             android:background="#00000000"
             android:hint="@string/item_note_title"
             android:inputType="text"
-            android:maxLength="15"
+            android:maxLength="20"
             android:textAlignment="center"
             android:textSize="25dp"
             android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/activity_add_creation_date_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:inputType="datetime"
-            android:paddingBottom="5dp"
-            android:text="@string/item_note_creation_date" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Expire date"
+                android:textAlignment="center" />
+
+            <EditText
+                android:id="@+id/activity_add_date_et"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#00000000"
+                android:focusable="false"
+                android:hint="MM/DD/YY"
+                android:inputType="none"
+                android:textAlignment="textEnd" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginBottom="10dp"/>
 
         <EditText
             android:id="@+id/activity_add_body_et"
@@ -48,7 +68,7 @@
             android:gravity="start"
             android:hint="@string/item_note_body"
             android:inputType="text|textMultiLine|textCapSentences"
-            android:paddingTop="10dp"
+            android:paddingTop="5dp"
             android:textSize="16dp"
             android:textStyle="normal" />
     </LinearLayout>
