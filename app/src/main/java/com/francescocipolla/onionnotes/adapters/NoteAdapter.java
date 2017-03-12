@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.colorpicker.ColorPickerSwatch;
 import com.francescocipolla.onionnotes.R;
 import com.francescocipolla.onionnotes.activities.MainActivity;
 import com.francescocipolla.onionnotes.models.Note;
@@ -25,6 +26,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteVH> {
     private static DateFormat dateFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH);
     private ArrayList<Note> dataSet = new ArrayList<>();
     private int position;
+
 
     public void addNote(Note note) {
         dataSet.add(0, note);
@@ -82,6 +84,10 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteVH> {
         return dataSet.size();
     }
 
+    public void setNoteColor(int color) {
+
+
+    }
     class NoteVH extends RecyclerView.ViewHolder {
         TextView title, body, lastUpdate, expireDate;
         ActionMode mActionMode;
@@ -109,6 +115,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteVH> {
                     return true;
                 }
             });
+
         }
     }
 }

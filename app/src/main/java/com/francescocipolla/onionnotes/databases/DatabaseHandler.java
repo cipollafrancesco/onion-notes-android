@@ -146,7 +146,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             note.setExpireDate(cursor.getString(4));
             note.setBookmarked(cursor.getInt(5) > 0);
             note.setNoteColor(cursor.getInt(6));
-
             String status = cursor.getString(7);
             States state = (status.equalsIgnoreCase(States.RUNNING.name())) ? States.RUNNING : States.EXPIRED;
             note.setStatus(state);
@@ -157,11 +156,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void changeStatus(Note note) {
         SQLiteDatabase db = getWritableDatabase();
-        String updateQuery = "UPDATE " + TABLE_NOTES +
+        String changeStatusQuery = "UPDATE " + TABLE_NOTES +
                 " SET " + NOTE_STATUS + " = '" + note.getStatus().name() + " '";
         String whereClause = "WHERE " + PRIMARY_KEY + " = '" + note.getId() + "' ;";
-        Log.d("UPDATE QUERY: ", updateQuery + whereClause);
-        db.execSQL(updateQuery + whereClause);
+        Log.d("UPDATE QUERY: ", changeStatusQuery + whereClause);
+        db.execSQL(changeStatusQuery + whereClause);
     }
 
 //    public void deleteAllNotes() {
@@ -177,19 +176,27 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void bookmark(int id) {
         SQLiteDatabase db = getWritableDatabase();
-        String updateQuery = "UPDATE " + TABLE_NOTES +
+        String bookmarkQuery = "UPDATE " + TABLE_NOTES +
                 " SET " + BOOKMARKED + " = 1 ";
         String whereClause = "WHERE " + PRIMARY_KEY + " = '" + id + "' ";
         // Log.d("UPDATE QUERY: ", updateQuery + whereClause);
-        db.execSQL(updateQuery + whereClause);
+        db.execSQL(bookmarkQuery + whereClause);
     }
 
     public void removeBookmark(int id) {
         SQLiteDatabase db = getWritableDatabase();
-        String updateQuery = "UPDATE " + TABLE_NOTES +
+        String removeBookmarkQuery = "UPDATE " + TABLE_NOTES +
                 " SET " + BOOKMARKED + " = 0 ";
         String whereClause = "WHERE " + PRIMARY_KEY + " = '" + id + "' ";
         // Log.d("UPDATE QUERY: ", updateQuery + whereClause);
-        db.execSQL(updateQuery + whereClause);
+        db.execSQL(removeBookmarkQuery + whereClause);
+    }
+
+    public void changeNoteColor(Note note) {
+        SQLiteDatabase db = getWritableDatabase();
+        String changeColorQuery = "UPDATE " + TABLE_NOTES +
+                " SET " + NOTE_COLOR + " = " + note.getNoteColor();
+        String whereClause = " WHERE " + PRIMARY_KEY + " = '" + note.getId()+ "' ";
+        db.execSQL(changeColorQuery + whereClause);
     }
 }

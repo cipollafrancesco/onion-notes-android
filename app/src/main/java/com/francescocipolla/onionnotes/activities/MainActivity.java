@@ -21,6 +21,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.colorpicker.ColorPickerDialog;
+import com.android.colorpicker.ColorPickerSwatch;
 import com.francescocipolla.onionnotes.R;
 import com.francescocipolla.onionnotes.adapters.NoteAdapter;
 import com.francescocipolla.onionnotes.databases.DatabaseHandler;
@@ -59,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     //    Utilities
     private DatabaseHandler dbHandler;
     public Context context;
+    private ColorPickerDialog colorPickerDialog;
 
     public ActionMode actionMode;
     public ActionMode.Callback mActionCallback = new ActionMode.Callback() {
@@ -122,6 +125,10 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.menu_color_button:
                     // Show palette and change color
+                    notePosition = noteAdapter.getPosition();
+                    temp = noteAdapter.getDataSet().get(notePosition);
+                    setNoteColor(temp,notePosition);
+                    toastString = "Color Changed";
                     break;
             }
             Toast.makeText(context, toastString, Toast.LENGTH_SHORT).show();
@@ -142,6 +149,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         intent = getIntent();
         context = this; // save this context for inner classes
+
+//         ColorPicker Objects
+        int[] colors = getResources().getIntArray(R.array.colors_array);
+        colorPickerDialog = new ColorPickerDialog();
+        colorPickerDialog.initialize(R.string.color_picker, colors, colors[0], 4, colors.length);
 
 //        Get the shared preferences from the last time
         sharedPreferences = getPreferences(MODE_PRIVATE);
@@ -307,6 +319,19 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog addNoteDialog = dialogBuilder.create(); // creating the dialog
         addNoteDialog.show();   // showing it
+    }
+
+    private void setNoteColor(final Note note, final int position) {
+        colorPickerDialog.setOnColorSelectedListener(new ColorPickerSwatch.OnColorSelectedListener() {
+            @Override
+            public void onColorSelected(int color) {
+                note.setNoteColor(color);
+                dbHandler.changeNoteColor(note);
+                colorPickerDialog.setSelectedColor(color);
+                noteAdapter.notifyItemChanged(position);
+            }
+        });
+        colorPickerDialog.show(getFragmentManager(), "Color Picker Dialog");
     }
 
 }
